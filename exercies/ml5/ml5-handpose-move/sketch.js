@@ -41,6 +41,9 @@ function draw() {
   showVideo = videoCheckbox.checked();
   showHands = handsCheckbox.checked();
 
+
+  pinchTracking();
+
   push();
   translate(-width/2, -height/2); // Push video back in Z space
 
@@ -50,6 +53,61 @@ function draw() {
     let aHeight = width / videoAspect;
     image(video, 0, 0, width, aHeight);
   }
+
+  if (showHands){
+    drawKeypoints();
+  }
+  
+
+  drawPinch();
   pop();
+
+  drawCube();
+
 }
 
+function drawPinch(){
+  if(leftHand.detected){
+    drawHand(leftHand);
+     if (leftHand.isPinching){
+      cubeSize = 0
+     }else{
+      cubeSize = map(leftHand.distance, pinchThreshold, pinchThreshold + 200, 0, 200);
+     }
+  }
+
+  if (rightHand.detected){
+    drawHand(rightHand);
+    if (!rightHand.isPinching){ //rightHand.isPinching == false or !rightHand.isPinching
+        rotationY = map(rightHand.midpoint.y, 0, 600, -PI, PI )
+        rotationX = map(rightHand.midpoint.x, 0, 600, -PI, PI )
+    }else{
+        clr = color(random(255), random(255), random(255));
+    }
+
+  }
+
+}
+
+function drawCube() {
+  push()
+
+  if (leftHand.detected) {
+    cubeX = leftHand.midpoint.x - width/2;
+    cubeY = leftHand.midpoint.y - height/2;
+    translate(cubeX, cubeY, 100);
+  }
+
+  stroke(clr)
+  strokeWeight(3)
+  noFill()
+
+  rotateX(rotationX);
+  rotateY(rotationY);
+
+  box(cubeSize);
+
+
+  pop()
+
+}
